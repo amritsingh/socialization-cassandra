@@ -101,7 +101,7 @@ class SocializationCassandraMigrations
       actor_id bigint,
       victim_id bigint,
       victim_type varchar,
-      networks set,
+      networks set<text>,
       created_at timeuuid,
       txt text,
       PRIMARY KEY ((victim_type, victim_id), created_at)
@@ -128,6 +128,8 @@ namespace :socialization do
     rescue Cassandra::Errors::AlreadyExistsError => e
       next
     end
+    session = Socialization.cassandra.connect(Socialization.keyspace)
+
     SocializationCassandraMigrations::MIGRATIONS.each do |m|
       begin
         Socialization.cassandra_session.execute(m)
