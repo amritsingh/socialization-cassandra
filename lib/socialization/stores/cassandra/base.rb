@@ -82,7 +82,7 @@ module Socialization
           if query_result.present? && query_result.rows.present?
             query_result.rows.to_a.each do |i|
               delete_entry_from_forward_table_name(i['actor_type'], i['actor_id'], victim.class, victim.id)
-              Socialization.cassandra_session.execute("DELETE FROM #{backward_table_name} WHERE victim_type='#{victim.class}' AND victim_id=#{victim.id} AND created_at=?", i["created_at"])
+              Socialization.cassandra_session.execute("DELETE FROM #{backward_table_name} WHERE victim_type='#{victim.class}' AND victim_id=#{victim.id} AND created_at=#{i["created_at"]}")
             end
           end
           # puts "DELETE FROM #{backward_table_name} WHERE victim_type=#{victim.class} AND victim_id=#{victim.id}"
@@ -95,7 +95,7 @@ module Socialization
           if query_result.present? && query_result.rows.present?
             query_result.rows.to_a.each do |i|
               delete_entry_from_backward_table_name(actor.class, actor.id, i['victim_type'], i['victim_id'])
-              Socialization.cassandra_session.execute("DELETE FROM #{forward_table_name} WHERE actor_type='#{actor.class}' AND actor_id=#{actor.id} AND created_at=?", i["created_at"])
+              Socialization.cassandra_session.execute("DELETE FROM #{forward_table_name} WHERE actor_type='#{actor.class}' AND actor_id=#{actor.id} AND created_at=#{i["created_at"]}")
             end
           end
           # Socialization.cassandra_session.execute("DELETE FROM #{forward_table_name} WHERE actor_type='#{actor.class}' AND actor_id=#{actor.id}")
@@ -108,7 +108,7 @@ module Socialization
         def add_new_entry(actor, victim, options={})
           [forward_table_name, backward_table_name].uniq.each do |table_name|
             query_columns = "actor_type, actor_id, victim_type, victim_id, created_at"
-            query_values = "'#{actor.class}', #{actor.id}, '#{victim.class}', #{victim.id}, now()"
+            query_values = "'#{actor.class}', #{actor.id}, '#{victim.class}', #{victim.id}, #{(Time.now.to_f * 100000).to_i}"
             if options[:text]
               query_columns += ", text"
               query_values += ", '#{options[:text]}'"
@@ -124,26 +124,20 @@ module Socialization
         end
 
         def delete_entry_from_forward_table_name(actor_type, actor_id, victim_type, victim_id)
-          row = Socialization.cassandra_session.execute("SELECT * FROM #{forward_table_name} WHERE actor_type='#{actor_type}' AND actor_id=#{actor_id} AND victim_type='#{victim_type}' AND victim_id=#{victim_id} ALLOW FILTERING").rows.to_a.first
-          Socialization.cassandra_session.execute("DELETE FROM #{forward_table_name} WHERE actor_type='#{actor_type}' AND actor_id=#{actor_id} AND created_at=?", row["created_at"]) if row
+          row = Socialization.cassandra_session.execute("SELECT * FROM #{forward_table_name} WHERE actor_type='#{actor_type}' AND actor_id=#{actor_id} AND victim_type='#{victim_type}' AND victim_id=#{victim_id} ALLOW FILTERING").rows.first
+          Socialization.cassandra_session.execute("DELETE FROM #{forward_table_name} WHERE actor_type='#{actor_type}' AND actor_id=#{actor_id} AND created_at=#{row["created_at"]}") # if row
           Socialization.cassandra_session.execute("UPDATE #{counter_forward_table_name} SET cnt = cnt - 1 WHERE actor_type = '#{actor_type}' AND actor_id = #{actor_id}") if counter_forward_table_name
         end
 
         def delete_entry_from_backward_table_name(actor_type, actor_id, victim_type, victim_id)
           row = Socialization.cassandra_session.execute("SELECT * FROM #{backward_table_name} WHERE actor_type='#{actor_type}' AND actor_id=#{actor_id} AND victim_type='#{victim_type}' AND victim_id=#{victim_id} ALLOW FILTERING").rows.to_a.first
-          Socialization.cassandra_session.execute("DELETE FROM #{backward_table_name} WHERE victim_type='#{victim_type}' AND victim_id=#{victim_id} AND created_at=?", row["created_at"]) if row
+          Socialization.cassandra_session.execute("DELETE FROM #{backward_table_name} WHERE victim_type='#{victim_type}' AND victim_id=#{victim_id} AND created_at=#{row["created_at"]}") if row
           Socialization.cassandra_session.execute("UPDATE #{counter_forward_table_name} SET cnt = cnt - 1 WHERE actor_type = '#{actor_type}' AND actor_id = #{actor_id}") if counter_forward_table_name
         end
 
         def delete_entry(actor, victim, options={})
-          if forward_table_name
-            row = Socialization.cassandra_session.execute("SELECT * FROM #{forward_table_name} WHERE actor_type='#{actor.class}' AND actor_id=#{actor.id} AND victim_type='#{victim.class}' AND victim_id=#{victim.id} ALLOW FILTERING").rows.to_a.first
-            Socialization.cassandra_session.execute("DELETE FROM #{forward_table_name} WHERE actor_type='#{actor.class}' AND actor_id=#{actor.id} AND created_at=?", row["created_at"]) if row
-          end
-          if backward_table_name
-            row = Socialization.cassandra_session.execute("SELECT * FROM #{backward_table_name} WHERE actor_type='#{actor.class}' AND actor_id=#{actor.id} AND victim_type='#{victim.class}' AND victim_id=#{victim.id} ALLOW FILTERING").rows.to_a.first
-            Socialization.cassandra_session.execute("DELETE FROM #{backward_table_name} WHERE victim_type='#{victim.class}' AND victim_id=#{victim.id} AND created_at=?", row["created_at"]) if row
-          end
+          delete_entry_from_forward_table_name(actor.class, actor.id, victim.class, victim.id) if forward_table_name
+          delete_entry_from_backward_table_name(actor.class, actor.id, victim.class, victim.id) if backward_table_name
           Socialization.cassandra_session.execute("UPDATE #{counter_forward_table_name} SET cnt = cnt - 1 WHERE actor_type = '#{actor.class}' AND actor_id = #{actor.id}") if counter_forward_table_name
           Socialization.cassandra_session.execute("UPDATE #{counter_backward_table_name} SET cnt = cnt - 1 WHERE victim_type = '#{victim.class}' AND victim_id = #{victim.id}") if counter_backward_table_name
         end

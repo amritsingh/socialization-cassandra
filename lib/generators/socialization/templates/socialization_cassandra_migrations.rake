@@ -9,7 +9,7 @@ class SocializationCassandraMigrations
       actor_id bigint,
       victim_id bigint,
       victim_type varchar,
-      created_at timeuuid,
+      created_at bigint,
       PRIMARY KEY ((actor_type, actor_id), created_at)
     );",
 
@@ -21,7 +21,7 @@ class SocializationCassandraMigrations
       actor_id bigint,
       victim_id bigint,
       victim_type varchar,
-      created_at timeuuid,
+      created_at bigint,
       PRIMARY KEY ((victim_type, victim_id), created_at)
     );",
 
@@ -42,7 +42,7 @@ class SocializationCassandraMigrations
       actor_id bigint,
       victim_id bigint,
       victim_type varchar,
-      created_at timeuuid,
+      created_at bigint,
       PRIMARY KEY ((actor_type, actor_id), created_at)
     );",
 
@@ -54,7 +54,7 @@ class SocializationCassandraMigrations
       actor_id bigint,
       victim_id bigint,
       victim_type varchar,
-      created_at timeuuid,
+      created_at bigint,
       PRIMARY KEY ((victim_type, victim_id), created_at)
     );",
 
@@ -82,7 +82,7 @@ class SocializationCassandraMigrations
       actor_id bigint,
       victim_id bigint,
       victim_type varchar,
-      created_at timeuuid,
+      created_at bigint,
       txt text,
       PRIMARY KEY ((victim_type, victim_id), created_at)
     );",
@@ -102,7 +102,7 @@ class SocializationCassandraMigrations
       victim_id bigint,
       victim_type varchar,
       networks set<text>,
-      created_at timeuuid,
+      created_at bigint,
       txt text,
       PRIMARY KEY ((victim_type, victim_id), created_at)
     );",
