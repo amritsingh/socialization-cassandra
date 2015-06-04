@@ -118,18 +118,9 @@ class SocializationCassandraMigrations
 
 end
 
-
-namespace :socialization do
+mespace :socialization do
   desc "Socialization Cassandra Migrations"
   task(:migrate => :environment) do
-    begin
-      session = Socialization.cassandra.connect('system')
-      session.execute("CREATE KEYSPACE #{Socialization.keyspace} WITH replication = {'class': 'NetworkTopologyStrategy'}")
-    rescue Cassandra::Errors::AlreadyExistsError => e
-      next
-    end
-    session = Socialization.cassandra.connect(Socialization.keyspace)
-
     SocializationCassandraMigrations::MIGRATIONS.each do |m|
       begin
         Socialization.cassandra_session.execute(m)
@@ -139,3 +130,4 @@ namespace :socialization do
     end
   end
 end
+

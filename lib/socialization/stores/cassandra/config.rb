@@ -14,16 +14,11 @@ module Socialization
 
     def keyspace=(keyspace)
       @cas_keyspace = keyspace
-      @cassandra_session = cassandra.connect(keyspace)
     end
 
     def cassandra_session
-      @cassandra_session ||= @cassandra.connect(@cas_keyspace)
-    rescue
-      @cassandra = Cassandra.cluster
-      @cas_keyspace = 'test'
-      @cassandra_session ||= @cassandra.connect(@cas_keyspace)
+      @cassandra.use @cas_keyspace if @cassandra.keyspace != @cas_keyspace
+      @cassandra
     end
-
   end
 end

@@ -11,7 +11,7 @@ class SocializationGenerator < Rails::Generators::Base
     copy_file "cassandra/model_comment.rb", 'app/models/comment.rb'
     copy_file "cassandra/model_share.rb", 'app/models/share.rb'
 
-    migration_template 'socialization_cassandra_migrations.rake', 'lib/tasks/socialization_cassandra_migrations.rake'
+    copy_file 'socialization_cassandra_migrations.rake', 'lib/tasks/socialization_cassandra_migrations.rake'
 
   end
 end
