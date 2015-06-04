@@ -118,7 +118,7 @@ class SocializationCassandraMigrations
 
 end
 
-mespace :socialization do
+namespace :socialization do
   desc "Socialization Cassandra Migrations"
   task(:migrate => :environment) do
     SocializationCassandraMigrations::MIGRATIONS.each do |m|
