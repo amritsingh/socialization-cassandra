@@ -1,21 +1,13 @@
-# Socialization
+# Socialization-Cassandra
 
-Socialization is a Ruby Gem that allows any ActiveRecord model to `Follow`, `Like` and/or `Mention` any other model. ActiveRecord or Redis can be used as a data store.
-
-The Follow feature is similar to Twitter's follow. For example, John follows Jane. Unlike Facebook's "friendship", Follow is a one-way concept. The fact that John follows Jane doesn't mean that Jane follows John.
-
-The Like feature works just like a Facebook Like. For example, John likes Pulp Fiction.
-
-The Mention feature was written with Facebook mentions in mind. For example, John mentions Jane in a comment. Typically, Jane would be highlighted in the comment user interface and possibly notified that John mentioned her. This Facebook feature is occasionally called Tagging, although tagging is generally something [entirely different](http://en.wikipedia.org/wiki/Tag_(metadata).
-
-[![Build Status](https://secure.travis-ci.org/cmer/socialization.png?branch=master)](http://travis-ci.org/cmer/socialization)
+Socialization is a Ruby Gem that allows any ActiveRecord model to `Follow`, `Like`, 'Comment' and/or `Share` any other model. Cassandra is used as a data store.
 
 ## Installation
 
 ### Rails 3/4
 
 Add the gem to the gemfile:
-`gem "socialization"`
+`gem "socialization-cassandra"`
 
 Run the generator:
 `rails generate socialization -s`
