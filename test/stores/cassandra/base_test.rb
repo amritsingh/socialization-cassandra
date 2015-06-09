@@ -25,18 +25,18 @@ class CassandraBaseStoreTest < TestCase
     context "#follow!" do
       should "create follow records" do
         @klass.follow!(@follower1, @followable1)
-        row = Socialization.cassandra_session.execute("SELECT actor_type, actor_id FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id=#{@followable1.id} ALLOW FILTERING").rows.to_a.first
+        row = Socialization.cassandra_session.execute("SELECT actor_type, actor_id FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id='#{@followable1.id}' ALLOW FILTERING").rows.to_a.first
         assert_array_similarity ["#{@follower1.class}:#{@follower1.id}"], ["#{row['actor_type']}:#{row['actor_id']}"]
-        row = Socialization.cassandra_session.execute("SELECT victim_type, victim_id FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id=#{@follower1.id} ALLOW FILTERING").rows.to_a.last
+        row = Socialization.cassandra_session.execute("SELECT victim_type, victim_id FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id='#{@follower1.id}' ALLOW FILTERING").rows.to_a.last
         assert_array_similarity ["#{@followable1.class}:#{@followable1.id}"], ["#{row['victim_type']}:#{row['victim_id']}"]
 
         @klass.follow!(@follower2, @followable1)
-        rows = Socialization.cassandra_session.execute("SELECT actor_type, actor_id FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id=#{@followable1.id} ALLOW FILTERING").rows
+        rows = Socialization.cassandra_session.execute("SELECT actor_type, actor_id FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id='#{@followable1.id}' ALLOW FILTERING").rows
         assert_array_similarity ["#{@follower1.class}:#{@follower1.id}", "#{@follower2.class}:#{@follower2.id}"], (rows.collect {|i| "#{i['actor_type']}:#{i['actor_id']}"})
 
-        row = Socialization.cassandra_session.execute("SELECT victim_type, victim_id FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id=#{@follower1.id} ALLOW FILTERING").rows.to_a.last
+        row = Socialization.cassandra_session.execute("SELECT victim_type, victim_id FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id='#{@follower1.id}' ALLOW FILTERING").rows.to_a.last
         assert_array_similarity ["#{@followable1.class}:#{@followable1.id}"], ["#{row['victim_type']}:#{row['victim_id']}"]
-        row = Socialization.cassandra_session.execute("SELECT victim_type, victim_id FROM #{@klass.backward_table_name} where actor_type='#{@follower2.class}' AND actor_id=#{@follower2.id} ALLOW FILTERING").rows.to_a.first
+        row = Socialization.cassandra_session.execute("SELECT victim_type, victim_id FROM #{@klass.backward_table_name} where actor_type='#{@follower2.class}' AND actor_id='#{@follower2.id}' ALLOW FILTERING").rows.to_a.first
         assert_array_similarity ["#{@followable1.class}:#{@followable1.id}"], ["#{row['victim_type']}:#{row['victim_id']}"]
       end
 
@@ -81,8 +81,8 @@ class CassandraBaseStoreTest < TestCase
 
       should "remove follow records" do
         @klass.unfollow!(@follower1, @followable1)
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id=#{@follower1.id} ALLOW FILTERING").rows.to_a
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id=#{@followable1.id} ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id='#{@follower1.id}' ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id='#{@followable1.id}' ALLOW FILTERING").rows.to_a
       end
     end
 
@@ -111,7 +111,7 @@ class CassandraBaseStoreTest < TestCase
         follower2 = ImAFollower.create
         follower1.follow!(@followable1)
         follower2.follow!(@followable1)
-        assert_array_similarity [follower1.id, follower2.id], @klass.followers(@followable1, follower1.class, :pluck => :id)
+        assert_array_similarity [follower1.id.to_s, follower2.id.to_s], @klass.followers(@followable1, follower1.class, :pluck => :id)
       end
     end
 
@@ -130,7 +130,7 @@ class CassandraBaseStoreTest < TestCase
         followable2 = ImAFollowable.create
         @follower1.follow!(followable1)
         @follower1.follow!(followable2)
-        assert_array_similarity [followable1.id, followable2.id], @klass.followables(@follower1, followable1.class, :pluck => :id)
+        assert_array_similarity [followable1.id.to_s, followable2.id.to_s], @klass.followables(@follower1, followable1.class, :pluck => :id)
       end
     end
 
@@ -142,9 +142,9 @@ class CassandraBaseStoreTest < TestCase
 
         @klass.remove_followers(@followable1)
         assert_equal 0, @followable1.followers(@follower1.class).count
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id=#{@followable1.id} ALLOW FILTERING").rows.to_a
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id=#{@follower1.id} ALLOW FILTERING").rows.to_a
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower2.class}' AND actor_id=#{@follower2.id} ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id='#{@followable1.id}' ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id='#{@follower1.id}' ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower2.class}' AND actor_id='#{@follower2.id}' ALLOW FILTERING").rows.to_a
       end
     end
 
@@ -156,9 +156,9 @@ class CassandraBaseStoreTest < TestCase
 
         @klass.remove_followables(@follower1)
         assert_equal 0, @follower1.followables(@followable1.class).count
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id=#{@followable1.id} ALLOW FILTERING").rows.to_a
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id=#{@follower1.id} ALLOW FILTERING").rows.to_a
-        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower2.class}' AND actor_id=#{@follower2.id} ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.forward_table_name} where victim_type='#{@followable1.class}' AND victim_id='#{@followable1.id}' ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower1.class}' AND actor_id='#{@follower1.id}' ALLOW FILTERING").rows.to_a
+        assert_empty Socialization.cassandra_session.execute("SELECT * FROM #{@klass.backward_table_name} where actor_type='#{@follower2.class}' AND actor_id='#{@follower2.id}' ALLOW FILTERING").rows.to_a
         # assert_empty Socialization.redis.smembers backward_key(@followable1)
         # assert_empty Socialization.redis.smembers backward_key(@follower2)
         # assert_empty Socialization.redis.smembers forward_key(@follower1)

@@ -100,33 +100,33 @@ ActiveRecord::Schema.define(:version => 0) do
 
   create_table :follows do |t|
     t.string  :follower_type
-    t.integer :follower_id
+    t.string :follower_id
     t.string  :followable_type
-    t.integer :followable_id
+    t.string :followable_id
     t.datetime :created_at
   end
 
   create_table :likes do |t|
     t.string  :liker_type
-    t.integer :liker_id
+    t.string :liker_id
     t.string  :likeable_type
-    t.integer :likeable_id
+    t.string :likeable_id
     t.datetime :created_at
   end
 
   create_table :comments do |t|
     t.string  :commenter_type
-    t.integer :commenter_id
+    t.string :commenter_id
     t.string  :commentable_type
-    t.integer :commentable_id
+    t.string :commentable_id
     t.datetime :created_at
   end
 
   create_table :shares do |t|
     t.string  :sharer_type
-    t.integer :sharer_id
+    t.string :sharer_id
     t.string  :shareable_type
-    t.integer :shareable_id
+    t.string :shareable_id
     t.datetime :created_at
   end
 
