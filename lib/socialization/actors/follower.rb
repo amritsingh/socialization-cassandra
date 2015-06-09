@@ -17,9 +17,9 @@ module Socialization
       #
       # @param [Followable] followable the object to be followed.
       # @return [Boolean]
-      def follow!(followable)
+      def follow!(followable, opts = {})
         raise Socialization::ArgumentError, "#{followable} is not followable!"  unless followable.respond_to?(:is_followable?) && followable.is_followable?
-        Socialization.follow_model.follow!(self, followable)
+        Socialization.follow_model.follow!(self, followable, opts)
       end
 
       # Delete a {Follow follow} relationship.
@@ -35,13 +35,13 @@ module Socialization
       #
       # @param [Followable] followable the object to follow/unfollow.
       # @return [Boolean]
-      def toggle_follow!(followable)
+      def toggle_follow!(followable, opts = {})
         raise Socialization::ArgumentError, "#{followable} is not followable!" unless followable.respond_to?(:is_followable?) && followable.is_followable?
         if follows?(followable)
           unfollow!(followable)
           false
         else
-          follow!(followable)
+          follow!(followable, opts)
           true
         end
       end

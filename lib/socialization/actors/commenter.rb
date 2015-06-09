@@ -17,9 +17,9 @@ module Socialization
       #
       # @param [Commentable] commentable the object to be commented.
       # @return [Boolean]
-      def comment!(commentable)
+      def comment!(commentable, opts = {})
         raise Socialization::ArgumentError, "#{commentable} is not commentable!"  unless commentable.respond_to?(:is_commentable?) && commentable.is_commentable?
-        Socialization.comment_model.comment!(self, commentable)
+        Socialization.comment_model.comment!(self, commentable, opts)
       end
 
       # Delete a {Comment comment} relationship.
@@ -35,13 +35,13 @@ module Socialization
       #
       # @param [Commentable] commentable the object to comment/uncomment.
       # @return [Boolean]
-      def toggle_comment!(commentable)
+      def toggle_comment!(commentable, opts = {})
         raise Socialization::ArgumentError, "#{commentable} is not commentable!" unless commentable.respond_to?(:is_commentable?) && commentable.is_commentable?
         if comments?(commentable)
           uncomment!(commentable)
           false
         else
-          comment!(commentable)
+          comment!(commentable, opts)
           true
         end
       end

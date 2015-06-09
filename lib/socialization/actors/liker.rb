@@ -17,9 +17,9 @@ module Socialization
       #
       # @param [Likeable] likeable the object to be liked.
       # @return [Boolean]
-      def like!(likeable)
+      def like!(likeable, opts = {})
         raise Socialization::ArgumentError, "#{likeable} is not likeable!"  unless likeable.respond_to?(:is_likeable?) && likeable.is_likeable?
-        Socialization.like_model.like!(self, likeable)
+        Socialization.like_model.like!(self, likeable, opts)
       end
 
       # Delete a {Like like} relationship.
@@ -35,13 +35,13 @@ module Socialization
       #
       # @param [Likeable] likeable the object to like/unlike.
       # @return [Boolean]
-      def toggle_like!(likeable)
+      def toggle_like!(likeable, opts = {})
         raise Socialization::ArgumentError, "#{likeable} is not likeable!" unless likeable.respond_to?(:is_likeable?) && likeable.is_likeable?
         if likes?(likeable)
           unlike!(likeable)
           false
         else
-          like!(likeable)
+          like!(likeable, opts)
           true
         end
       end

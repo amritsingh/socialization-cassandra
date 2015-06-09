@@ -17,9 +17,9 @@ module Socialization
       #
       # @param [Shareable] shareable the object to be shared.
       # @return [Boolean]
-      def share!(shareable)
+      def share!(shareable, opts = {})
         raise Socialization::ArgumentError, "#{shareable} is not shareable!"  unless shareable.respond_to?(:is_shareable?) && shareable.is_shareable?
-        Socialization.share_model.share!(self, shareable)
+        Socialization.share_model.share!(self, shareable, opts)
       end
 
       # Delete a {Share share} relationship.
@@ -35,13 +35,13 @@ module Socialization
       #
       # @param [Shareable] shareable the object to share/unshare.
       # @return [Boolean]
-      def toggle_share!(shareable)
+      def toggle_share!(shareable, opts = {})
         raise Socialization::ArgumentError, "#{shareable} is not shareable!" unless shareable.respond_to?(:is_shareable?) && shareable.is_shareable?
         if shares?(shareable)
           unshare!(shareable)
           false
         else
-          share!(shareable)
+          share!(shareable, opts)
           true
         end
       end
