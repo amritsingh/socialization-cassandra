@@ -17,9 +17,11 @@ module Socialization
     end
 
     def cassandra_session
+      return @cassandra_session if !@cassandra_session.nil?
       @cassandra = Cassandra.cluster if @cassandra.nil?
       @cas_keyspace = 'test' if @cas_keyspace.nil?
-      @cassandra.connect @cas_keyspace
+      @cassandra_session = @cassandra.connect @cas_keyspace
+      @cassandra_session
     end
   end
 end
